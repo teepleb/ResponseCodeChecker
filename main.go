@@ -11,8 +11,14 @@ import (
 func main() {
 	var responseCodes = make(map[string]int)
 
-	listOfURLsToCheck := loadFile("urls.txt")
+	// snag the file name/path for the list of URLs to load
+	args := os.Args
 
+	// load the file into memory
+	listOfURLsToCheck := loadFile(args[1])
+
+	// this will iterate over the list of URLs and check the response code of each
+	// using the http.Get package
 	for _, element := range listOfURLsToCheck {
 		resp, err := http.Get(element)
 		if err != nil {
@@ -21,9 +27,11 @@ func main() {
 		responseCodes[element] = resp.StatusCode
 	}
 
+	// save off the map of response codes to a CSV for further use
 	saveFile(responseCodes)
 }
 
+// loadFile will load a basic file line by line into memory and return it as a string slice
 func loadFile(path string) []string {
 	var tempData []string
 	file, err := os.Open(path)
@@ -40,6 +48,8 @@ func loadFile(path string) []string {
 	return tempData
 }
 
+// saveFile will check if the default file exists in the CWD
+// and if it does, remove it and recreate it with the data we want the user to have
 func saveFile(responseCodes map[string]int) {
 	if _, err := os.Stat("ResponseCodes.csv"); os.IsExist(err) {
 		err := os.Remove("ResponseCodes.csv")
